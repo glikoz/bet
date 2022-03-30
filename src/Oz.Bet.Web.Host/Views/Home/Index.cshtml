@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <div class="row">
+        <div class="col-6">
+            <ul id="messagesList"></ul>
+        </div>
+    </div>
+</div>
+<script src="js/signalr/dist/browser/signalr.js"></script>
+<script type="text/javascript">
+"use strict";
+
+var connection = new signalR.HubConnectionBuilder().withUrl("http://localhost:90" + "/hubs/oddchange", 
+{ withCredentials: false})
+.build();
+
+connection.start().then(function () {
+}).catch(function (err) {
+    return console.error(err.toString());
+});
+
+connection.on("ChangeOccured", function (message) {
+   let res="Version " + message.version +"<br/><table>";
+   
+   for (const [key, value] of Object.entries(message.games)) {
+       res+="<tr><td>"+value.name+"</td>";
+       debugger;
+       for (const [outcome, odd] of Object.entries(value.marketDict["whowins"].outcomeDict)) {
+           debugger;
+           res+="<td>"+outcome+":"+odd.odd+"</td>";
+       }
+      res+="</tr>";
+   }
+   document.getElementById("messagesList").innerHTML=res;
+});
+
+</script>

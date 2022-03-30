@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  oz.bet.dataprovider.host:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+
+
+  oz.bet.broker.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+

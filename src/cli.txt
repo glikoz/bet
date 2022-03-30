@@ -1,0 +1,9 @@
+docker run --name oz-redis -p 6379:6379 -d redis
+docker run --name oz-redis-manager -v redisinsight:/db -p 8001:8001 redislabs/redisinsight:latest
+docker-compose down --rmi all -v
+docker volume ls
+docker volume 
+docker images
+docker inspect 364
+
+docker rmi -f $(docker images -aq)

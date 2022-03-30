@@ -1,0 +1,25 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option csharp_namespace = "BetProto";
+
+package bulletinPackage;
+
+service Bulletin {
+  rpc SubscribeBulletinStream (google.protobuf.Empty) returns (stream BulletinResult);
+  rpc GetBulletin(google.protobuf.Empty) returns (BulletinResult);
+}
+
+message BulletinResult {
+   int32 VersionId = 1;
+   repeated Game GameList = 2;
+}
+
+message Game {
+    string Id = 1;
+    string Name = 2;
+    double Home = 3;
+    double Away = 4;
+    double Draw = 5;
+    int32 Version = 6;
+}
+

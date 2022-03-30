@@ -1,0 +1,119 @@
+version: '3.4'
+
+services:
+  
+  oz.bet.dataprovider.host:
+    image: ${DOCKER_REGISTRY-}ozbetdataproviderhost
+    build:
+      context: .
+      dockerfile: Oz.Bet.DataProvider.Host/Dockerfile
+    environment:
+      Log: "provider"
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./log:/log
+
+  oz.bet.dataconsumer.host:
+    image: ${DOCKER_REGISTRY-}ozbetdataconsumerhost
+    build:
+      context: .
+      dockerfile: Oz.Bet.DataConsumer.Host/Dockerfile
+    environment:
+        RabbitUrl: "amqp://guest:guest@rabbitmq:5672"
+        ServerUrl: "http://oz.bet.dataprovider.host:5001"
+        Redis: "redis:6379,abortConnect=false,SyncTimeout=10000,ConnectTimeout=2000"
+        Log: "consumer"
+    depends_on: 
+      - rabbitmq
+      - oz.bet.dataprovider.host
+      - redis
+    volumes:
+      - ./log:/log
+
+  
+
+  oz.bet.broker.api:
+    image: ${DOCKER_REGISTRY-}ozbetbrokerapi
+    build:
+      context: .
+      dockerfile: Oz.Bet.Broker.Api/Dockerfile
+    depends_on: 
+      - rabbitmq
+      - sql
+    environment:
+      RabbitUrl: "amqp://guest:guest@rabbitmq:5672"
+      Log: "broker"
+      Redis: "redis:6379,abortConnect=false,SyncTimeout=10000,ConnectTimeout=2000"
+      Sql: "Server=localhost:1434;Database=Bet;Trusted_Connection=false;User ID=sa;Password=^!oguz1234O"
+    volumes:
+      - ./log/broker:/log/broker
+
+  oz.bet.web.host:
+    image: ${DOCKER_REGISTRY-}ozbetwebhost
+    build:
+      context: .
+      dockerfile: Oz.Bet.Web.Host/Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      SocketUrl: "http://oz.bet.notification.app"
+      Log: "website"
+    volumes:
+      - ./log/website:/log/website
+  oz.bet.notification.app:
+    image: ${DOCKER_REGISTRY-}ozbetnotificationapp
+    build:
+      context: .
+      dockerfile: Oz.Bet.Notification.App/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      RabbitUrl: "amqp://guest:guest@rabbitmq:5672"
+      Log: "notification"
+      Redis: "redis:6379,abortConnect=false,SyncTimeout=10000,ConnectTimeout=2000"
+    ports:
+      - "90:80"
+    volumes:
+      - ./log/notification:/log/notification
+  
+  redis:
+    image: redislabs/redismod
+    ports:
+      - 6379:6379
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    ports:
+      - '8001:8001'
+    volumes:
+      - ./db/redis:/db 
+
+  sql:
+    ports:
+      - 1434:1433
+    environment:
+      SA_PASSWORD: "^!oguz1234O"
+      ACCEPT_EULA: "Y"
+    build:
+      context: .
+      dockerfile: DbDockerfile
+    volumes:
+      - ./db/sql:/db 
+ 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 1
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+ 
+   
+
+
