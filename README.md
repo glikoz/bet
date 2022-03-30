@@ -36,7 +36,7 @@ The infrastructure is consists of three parts:
   
 5- Storages:   
 
-   - sqlserver: Server=localhost;Database=Bet;Trusted_Connection=false;User ID=sa;Password=^!oguz1234O  
+   - sqlserver: Server=localhost:1434;Database=Bet;Trusted_Connection=false;User ID=sa;Password=^!oguz1234O  
    - redis: redis:6379
    - rabbitmq: amqp://guest:guest@rabbitmq:5672
 
